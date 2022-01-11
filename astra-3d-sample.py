@@ -1,4 +1,5 @@
 import astra_3d_utilities as au 
+import video_analysis as va 
 import cv2 
 
 '''
@@ -21,21 +22,65 @@ vw = au.Viewer3D(
     (resolutionWidth, resolutionHeight),
 )
 
+gui = va.GUI()
+gui._create_windows(
+    {
+        "color": {
+            "position": (100,0),
+            "flag": cv2.WINDOW_AUTOSIZE,
+        },
+        "depth": {
+            "position": (450,0),
+            "flag": cv2.WINDOW_AUTOSIZE,
+        },
+        "result": {
+            "position": (0,450),
+            "flag": cv2.WINDOW_AUTOSIZE,
+        },
+        "HSV Filters": {
+            "position": (0,0),
+            "flag": cv2.WINDOW_NORMAL,
+        }
+    }
+)
+
+vd = va.VideoDeconstruction()
+
+trackbars = {
+    "HSV Filters": {
+        "H min": (0,179),
+        "S min": (0,255),
+        "V min": (0,255),
+        "H max": (179,179),
+        "S max": (255,255),
+        "V max": (255,255),
+    }
+}
+
+vd._create_hsv_trackbars(trackbars)
+
 running = True 
 
 while running:
     color = vw._get_color_frame()
     depth = vw._get_depth_frame()
     
+    vd._extract_hsv_inrange(
+        color, "clean"
+    )
+    
+    result = vd.result_frame.copy()
+    
     center_distance = depth[
         int(resolutionHeight / 2),
         int(resolutionWidth / 2)
     ]
     
-    print(center_distance)
+#    print(center_distance)
     
     cv2.imshow("color", color)
     cv2.imshow("depth", depth)
+    cv2.imshow("result", result)
     
     if cv2.waitKey(15)==27: #esc to quit
         running = False
