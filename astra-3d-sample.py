@@ -25,14 +25,14 @@ vw = au.Viewer3D(
 gui = va.GUI()
 gui._create_windows(
     {
-        "color": {
-            "position": (100,0),
-            "flag": cv2.WINDOW_AUTOSIZE,
-        },
-        "depth": {
-            "position": (450,0),
-            "flag": cv2.WINDOW_AUTOSIZE,
-        },
+#        "color": {
+#            "position": (100,0),
+#            "flag": cv2.WINDOW_AUTOSIZE,
+#        },
+#        "depth": {
+#            "position": (450,0),
+#            "flag": cv2.WINDOW_AUTOSIZE,
+#        },
         "result": {
             "position": (0,450),
             "flag": cv2.WINDOW_AUTOSIZE,
@@ -69,17 +69,28 @@ while running:
         color, "clean"
     )
     
+    vd._find_circle()
+    
     result = vd.result_frame.copy()
     
-    center_distance = depth[
-        int(resolutionHeight / 2),
-        int(resolutionWidth / 2)
-    ]
+    if vd.ball_center is not None:
+        
+        center_distance = depth[
+            vd.ball_center[1], vd.ball_center[0]
+        ]
+        
+        cv2.putText(
+            result,
+            str(center_distance),
+            vd.ball_center,
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.5,
+            (255,0,0),
+            2
+        )
     
-#    print(center_distance)
-    
-    cv2.imshow("color", color)
-    cv2.imshow("depth", depth)
+#    cv2.imshow("color", color)
+#    cv2.imshow("depth", depth)
     cv2.imshow("result", result)
     
     if cv2.waitKey(15)==27: #esc to quit

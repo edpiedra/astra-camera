@@ -61,3 +61,28 @@ class VideoDeconstruction():
         self.result_frame = result.copy()
         
         return result, mask
+    
+    def _find_circle(self):
+        mask = self.hsv_mask.copy()
+        
+        cnts, _ = cv2.findContours(
+            mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE
+        )
+        
+        self.ball_center = None 
+        
+        if len(cnts) > 0:
+            c = max(cnts, key=cv2.contourArea)
+            
+            ((x,y), radius) = cv2.minEnclosingCircle(c)
+            M = cv2.moments(c)
+            
+            self.ball_center = (int(x),int(y))
+            
+            if radius > 10:
+                cv2.circle(self.result_frame, 
+                           (int(x), int(y)),
+                           int(radius),
+                           (0,255,0),
+                           2)
+        
