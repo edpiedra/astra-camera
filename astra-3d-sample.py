@@ -1,5 +1,4 @@
 import astra_3d_utilities as au 
-import video_analysis as va 
 import cv2 
 
 '''
@@ -9,6 +8,9 @@ initialization has the following options:
 
     - resolution: options are:
         (640, 480) or (320, 240)
+        
+        
+Adjust the HSV filters to extract the color of the ball.
 '''
 
 resolutionWidth = 640
@@ -22,19 +24,19 @@ vw = au.Viewer3D(
     (resolutionWidth, resolutionHeight),
 )
 
-gui = va.GUI()
+gui = au.GUI()
 gui._create_windows(
     {
-#        "color": {
-#            "position": (100,0),
-#            "flag": cv2.WINDOW_AUTOSIZE,
-#        },
-#        "depth": {
-#            "position": (450,0),
-#            "flag": cv2.WINDOW_AUTOSIZE,
-#        },
+        "color": {
+            "position": (325,0),
+            "flag": cv2.WINDOW_AUTOSIZE,
+        },
+        "depth": {
+            "position": (325,525),
+            "flag": cv2.WINDOW_AUTOSIZE,
+        },
         "result": {
-            "position": (0,450),
+            "position": (975,0),
             "flag": cv2.WINDOW_AUTOSIZE,
         },
         "HSV Filters": {
@@ -43,8 +45,6 @@ gui._create_windows(
         }
     }
 )
-
-vd = va.VideoDeconstruction()
 
 trackbars = {
     "HSV Filters": {
@@ -57,44 +57,21 @@ trackbars = {
     }
 }
 
-vd._create_hsv_trackbars(trackbars)
+vw._create_hsv_trackbars(trackbars)
 
 running = True 
 
 while running:
-    color = vw._get_color_frame()
-    depth = vw._get_depth_frame()
+    vw._get_color_frame()
+    vw._get_depth_frame()
+    vw._extract_hsv_inrange()
+    vw._find_circle()
     
-    vd._extract_hsv_inrange(
-        color, "clean"
-    )
-    
-    vd._find_circle()
-    
-    result = vd.result_frame.copy()
-    
-    if vd.ball_center is not None:
-        
-        center_distance = depth[
-            vd.ball_center[1], vd.ball_center[0]
-        ]
-        
-        cv2.putText(
-            result,
-            str(center_distance),
-            vd.ball_center,
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.5,
-            (255,0,0),
-            2
-        )
-    
-#    cv2.imshow("color", color)
-#    cv2.imshow("depth", depth)
-    cv2.imshow("result", result)
+    cv2.imshow("color", vw.color_frame)
+    cv2.imshow("depth", vw.depth_frame)
+    cv2.imshow("result", vw.result_frame)
     
     if cv2.waitKey(15)==27: #esc to quit
         running = False
         
 vw._destroy()
-cv2.destroyAllWindows()
