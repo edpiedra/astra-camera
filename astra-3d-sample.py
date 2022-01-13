@@ -1,5 +1,5 @@
 import astra_3d_utilities as au 
-import cv2 
+import cv2, time
 
 '''
 initialization has the following options:
@@ -62,12 +62,23 @@ vw._create_hsv_trackbars(trackbars)
 running = True 
 
 while running:
+    start_time = time.time()
+    
     vw._get_color_frame()
     vw._get_depth_frame()
     vw._extract_hsv_inrange()
     vw._find_circle()
     
-    cv2.imshow("color", vw.color_frame)
+    fps = 1.0 / (time.time()-start_time)
+    text = "fps: {:.2f}".format(fps)
+    color_frame = vw.color_frame.copy()
+    
+    cv2.putText(
+        color_frame, text, (20,20),
+        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 2
+        )
+    
+    cv2.imshow("color", color_frame)
     cv2.imshow("depth", vw.depth_frame)
     cv2.imshow("result", vw.result_frame)
     
